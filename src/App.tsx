@@ -70,7 +70,6 @@ function App() {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black p-8">
-            {/* Header */}
             <div className="text-center mb-12">
                 <h1 className="text-6xl font-bold text-white mb-4">API SPOTIFY</h1>
                 <p className="text-xl text-gray-300">Recherchez vos artistes préférés</p>
@@ -99,7 +98,6 @@ function App() {
                 </div>
             </div>
 
-            {/* Albums Grid */}
             <div className="max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {albums.map((album) => (
