@@ -92,7 +92,7 @@ function App() {
                     />
                     <button
                         onClick={search}
-                        className="px-8 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+                        className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
                     >
                         Search
                     </button>
