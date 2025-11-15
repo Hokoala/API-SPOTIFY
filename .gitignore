@@ -23,3 +23,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.eslintrc.cjs
+*.vite-env.d.ts
+vite.config.js.timestamp-1763196102531-d6b76406bec65.mjs
