@@ -13,53 +13,60 @@ export function ListeningStats({
     uniqueTracks,
     topGenre,
 }: ListeningStatsProps) {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.round(totalMinutes % 60);
+
     const stats = [
         {
             icon: Clock,
-            label: "Temps d'écoute",
-            value: `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`,
-            subtext: "ce mois-ci",
+            label: "Duree totale",
+            value: hours > 0 ? `${hours}h ${minutes}min` : `${minutes}min`,
+            subtext: "de vos top titres",
+            color: "text-green-400",
         },
         {
             icon: Users,
             label: "Artistes",
             value: uniqueArtists.toString(),
-            subtext: "écoutés",
+            subtext: "ecoutes",
+            color: "text-blue-400",
         },
         {
             icon: Music,
             label: "Titres",
             value: uniqueTracks.toString(),
-            subtext: "différents",
+            subtext: "differents",
+            color: "text-purple-400",
         },
         {
             icon: Disc,
             label: "Genre favori",
             value: topGenre,
-            subtext: "le plus écouté",
+            subtext: "le plus ecoute",
+            color: "text-orange-400",
         },
     ];
 
     return (
-        <div className="bg-white rounded-xl p-6 border border-black/10 shadow-lg">
-            <h2 className="text-xl font-bold mb-6 text-center text-black">Statistiques d'écoute</h2>
+        <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+            <h2 className="text-xl font-bold mb-6 text-center text-white">Statistiques d'ecoute</h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat, index) => (
                     <div
                         key={index}
-                        className="bg-gray-50 rounded-lg p-4 border border-black/5 hover:border-black/20 transition-all"
+                        className="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700/50 hover:border-zinc-600 transition-all"
                     >
                         <div className="flex items-center gap-2 mb-3">
-                            <stat.icon className="w-5 h-5 text-black/70" />
-                            <span className="text-xs text-gray-600 uppercase tracking-wide">
+                            <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                            <span className="text-xs text-zinc-400 uppercase tracking-wide">
                                 {stat.label}
                             </span>
                         </div>
-                        <p className="text-2xl md:text-3xl font-bold text-black truncate">
+                        <p className="text-2xl md:text-3xl font-bold text-white truncate">
                             {stat.value}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">{stat.subtext}</p>
+                        <p className="text-xs text-zinc-500 mt-1">{stat.subtext}</p>
                     </div>
                 ))}
             </div>

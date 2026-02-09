@@ -11,28 +11,24 @@ export function GenreDonutChart({ genres }: GenreDonutChartProps) {
     const total = genres.reduce((sum, g) => sum + g.count, 0);
     const topGenres = genres.slice(0, 6);
 
-    // Calculate percentages and angles
     let currentAngle = 0;
+    const colors = ["#22c55e", "#3b82f6", "#a855f7", "#f97316", "#ec4899", "#14b8a6"];
+
     const segments = topGenres.map((genre, index) => {
         const percentage = (genre.count / total) * 100;
         const angle = (percentage / 100) * 360;
         const startAngle = currentAngle;
         currentAngle += angle;
 
-        // Grayscale colors from dark to light for better contrast on white
-        const grayValues = [30, 70, 110, 150, 190, 220];
-        const grayValue = grayValues[index] || 150;
-
         return {
             ...genre,
             percentage,
             startAngle,
             endAngle: currentAngle,
-            color: `rgb(${grayValue}, ${grayValue}, ${grayValue})`,
+            color: colors[index] || "#6b7280",
         };
     });
 
-    // Create SVG arc path
     const createArc = (startAngle: number, endAngle: number, radius: number, innerRadius: number) => {
         const startRad = (startAngle - 90) * (Math.PI / 180);
         const endRad = (endAngle - 90) * (Math.PI / 180);
@@ -53,11 +49,10 @@ export function GenreDonutChart({ genres }: GenreDonutChartProps) {
     };
 
     return (
-        <div className="bg-white rounded-xl p-6 border border-black/10 shadow-lg">
-            <h2 className="text-xl font-bold mb-6 text-center text-black">Distribution des Genres</h2>
+        <div className="bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
+            <h2 className="text-xl font-bold mb-6 text-center text-white">Distribution des Genres</h2>
 
             <div className="flex flex-col md:flex-row items-center gap-6">
-                {/* Donut Chart */}
                 <div className="relative">
                     <svg width="200" height="200" viewBox="0 0 200 200">
                         {segments.map((segment, index) => (
@@ -66,16 +61,14 @@ export function GenreDonutChart({ genres }: GenreDonutChartProps) {
                                 d={createArc(segment.startAngle, segment.endAngle, 90, 50)}
                                 fill={segment.color}
                                 className="transition-all duration-300 hover:opacity-80"
-                                style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}
                             />
                         ))}
-                        {/* Center circle */}
-                        <circle cx="100" cy="100" r="45" fill="#f9fafb" />
+                        <circle cx="100" cy="100" r="45" fill="#18181b" />
                         <text
                             x="100"
                             y="95"
                             textAnchor="middle"
-                            className="fill-black text-2xl font-bold"
+                            className="fill-white text-2xl font-bold"
                             style={{ fontSize: "24px" }}
                         >
                             {topGenres.length}
@@ -84,7 +77,7 @@ export function GenreDonutChart({ genres }: GenreDonutChartProps) {
                             x="100"
                             y="115"
                             textAnchor="middle"
-                            className="fill-gray-600"
+                            className="fill-zinc-400"
                             style={{ fontSize: "12px" }}
                         >
                             genres
@@ -92,17 +85,16 @@ export function GenreDonutChart({ genres }: GenreDonutChartProps) {
                     </svg>
                 </div>
 
-                {/* Legend */}
                 <div className="flex-1 grid grid-cols-2 gap-3">
                     {segments.map((segment, index) => (
                         <div key={index} className="flex items-center gap-2">
                             <div
-                                className="w-4 h-4 rounded-sm flex-shrink-0 border border-black/10"
+                                className="w-3 h-3 rounded-full flex-shrink-0"
                                 style={{ backgroundColor: segment.color }}
                             />
                             <div className="min-w-0">
-                                <p className="text-sm font-medium truncate capitalize text-black">{segment.name}</p>
-                                <p className="text-xs text-gray-500">{segment.percentage.toFixed(1)}%</p>
+                                <p className="text-sm font-medium truncate capitalize text-white">{segment.name}</p>
+                                <p className="text-xs text-zinc-500">{segment.percentage.toFixed(1)}%</p>
                             </div>
                         </div>
                     ))}
