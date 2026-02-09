@@ -1,138 +1,257 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react"
+import { Routes, Route, Navigate } from "react-router-dom"
+import Login from "./components/Login"
+import DashboardPage from "./pages/DashboardPage"
+import SearchPage from "./pages/SearchPage"
+import ComparePage from "./pages/ComparePage"
 
-const clientId = import.meta.env.VITE_CLIENT_ID;
-const clientSecret = import.meta.env.VITE_CLIENT_SECRET;
-
-interface Album {
-    id: string;
-    name: string;
-    release_date: string;
-    images: { url: string }[];
-    external_urls: { spotify: string };
+export interface SpotifyUser {
+    display_name: string
+    email: string
+    images: { url: string }[]
+    followers: { total: number }
+    country: string
+    product: string
 }
 
+export interface Artist {
+    id: string
+    name: string
+    images: { url: string }[]
+    genres: string[]
+    popularity: number
+}
+
+export interface Track {
+    id: string
+    name: string
+    artists: { name: string }[]
+    album: {
+        name: string
+        images: { url: string }[]
+    }
+    duration_ms: number
+}
+
+export interface RecentTrack {
+    track: {
+        id: string
+        name: string
+        artists: { name: string }[]
+        album: {
+            name: string
+            images: { url: string }[]
+        }
+    }
+    played_at: string
+}
+
+export interface SpotifyData {
+    user: SpotifyUser | null
+    topArtists: Artist[]
+    topTracks: Track[]
+    recentTracks: RecentTrack[]
+}
+
+export type TimeRange = "short_term" | "medium_term" | "long_term"
+
 function App() {
-    const [searchInput, setSearchInput] = useState("");
-    const [accessToken, setAccessToken] = useState("");
-    const [albums, setAlbums] = useState<Album[]>([]);
+    const [token, setToken] = useState<string | null>(null)
+    const [spotifyData, setSpotifyData] = useState<SpotifyData>({
+        user: null,
+        topArtists: [],
+        topTracks: [],
+        recentTracks: [],
+    })
+    const [loading, setLoading] = useState(true)
+    const [dataLoading, setDataLoading] = useState(false)
+    const [timeRange, setTimeRange] = useState<TimeRange>("medium_term")
 
     useEffect(() => {
-        const authParams = {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body:
-                "grant_type=client_credentials&client_id=" +
-                clientId +
-                "&client_secret=" +
-                clientSecret,
-        };
+        const handleCallback = async () => {
+            const params = new URLSearchParams(window.location.search)
+            const code = params.get("code")
 
-        fetch("https://accounts.spotify.com/api/token", authParams)
-            .then((result) => result.json())
-            .then((data) => {
-                setAccessToken(data.access_token);
-            });
-    }, []);
+            if (code) {
+                try {
+                    const clientId = import.meta.env.VITE_CLIENT_ID
+                    const redirectUri = import.meta.env.VITE_REDIRECT_URI
+                    const codeVerifier = localStorage.getItem("code_verifier")
 
-    async function search() {
-        const artistParams = {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + accessToken,
-            },
-        };
+                    if (!codeVerifier) {
+                        console.error("Code verifier not found")
+                        setLoading(false)
+                        return
+                    }
 
-        // Get Artist
-        const artistID = await fetch(
-            "https://api.spotify.com/v1/search?q=" + searchInput + "&type=artist",
-            artistParams
+                    const response = await fetch("https://accounts.spotify.com/api/token", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: new URLSearchParams({
+                            grant_type: "authorization_code",
+                            code: code,
+                            redirect_uri: redirectUri,
+                            client_id: clientId,
+                            code_verifier: codeVerifier,
+                        }),
+                    })
+
+                    localStorage.removeItem("code_verifier")
+
+                    const data = await response.json()
+
+                    if (data.access_token) {
+                        setToken(data.access_token)
+                        localStorage.setItem("spotify_token", data.access_token)
+                        const redirectPath = localStorage.getItem("redirect_after_login")
+                        if (redirectPath) {
+                            localStorage.removeItem("redirect_after_login")
+                            window.history.replaceState({}, document.title, redirectPath)
+                        } else {
+                            window.history.replaceState({}, document.title, "/")
+                        }
+                    }
+                } catch (error) {
+                    console.error("Erreur d'authentification:", error)
+                }
+            } else {
+                const savedToken = localStorage.getItem("spotify_token")
+                if (savedToken) {
+                    setToken(savedToken)
+                }
+            }
+            setLoading(false)
+        }
+
+        handleCallback()
+    }, [])
+
+    useEffect(() => {
+        const fetchSpotifyData = async () => {
+            if (!token) return
+
+            setDataLoading(true)
+            try {
+                const headers = { Authorization: `Bearer ${token}` }
+
+                const [userRes, artistsRes, tracksRes, recentRes] = await Promise.all([
+                    fetch("https://api.spotify.com/v1/me", { headers }),
+                    fetch(`https://api.spotify.com/v1/me/top/artists?limit=20&time_range=${timeRange}`, { headers }),
+                    fetch(`https://api.spotify.com/v1/me/top/tracks?limit=20&time_range=${timeRange}`, { headers }),
+                    fetch("https://api.spotify.com/v1/me/player/recently-played?limit=20", { headers }),
+                ])
+
+                if (!userRes.ok) {
+                    localStorage.removeItem("spotify_token")
+                    setToken(null)
+                    return
+                }
+
+                const [user, artistsData, tracksData, recentData] = await Promise.all([
+                    userRes.json(),
+                    artistsRes.ok ? artistsRes.json() : { items: [] },
+                    tracksRes.ok ? tracksRes.json() : { items: [] },
+                    recentRes.ok ? recentRes.json() : { items: [] },
+                ])
+
+                setSpotifyData({
+                    user,
+                    topArtists: artistsData.items || [],
+                    topTracks: tracksData.items || [],
+                    recentTracks: recentData.items || [],
+                })
+            } catch (error) {
+                console.error("Erreur:", error)
+            } finally {
+                setDataLoading(false)
+            }
+        }
+
+        fetchSpotifyData()
+    }, [token, timeRange])
+
+    const handleLogout = () => {
+        localStorage.removeItem("spotify_token")
+        setToken(null)
+        setSpotifyData({
+            user: null,
+            topArtists: [],
+            topTracks: [],
+            recentTracks: [],
+        })
+    }
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-black">
+                <div className="animate-spin w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full"></div>
+            </div>
         )
-            .then((result) => result.json())
-            .then((data) => {
-                return data.artists.items[0].id;
-            });
+    }
 
-        // Get Artist Albums
-        await fetch(
-            "https://api.spotify.com/v1/artists/" +
-            artistID +
-            "/albums?include_groups=album&market=US&limit=50",
-            artistParams
+    if (!token) {
+        // Store compare URL for redirect after login
+        const currentPath = window.location.pathname + window.location.search
+        if (currentPath.startsWith("/compare?data=")) {
+            localStorage.setItem("redirect_after_login", currentPath)
+        }
+        return <Login />
+    }
+
+    if (dataLoading && !spotifyData.user) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-black gap-4">
+                <div className="animate-spin w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full"></div>
+                <p className="text-white text-lg">Chargement de vos donnees Spotify...</p>
+            </div>
         )
-            .then((result) => result.json())
-            .then((data) => {
-                setAlbums(data.items);
-            });
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black p-8">
-            <div className="text-center mb-12">
-                <h1 className="text-6xl font-bold text-white mb-4">API SPOTIFY</h1>
-                <p className="text-xl text-gray-300">Recherchez vos artistes préférés</p>
-            </div>
-
-            <div className="max-w-2xl mx-auto mb-12">
-                <div className="flex gap-3">
-                    <input
-                        type="text"
-                        placeholder="Search For Artist"
-                        aria-label="Search for an Artist"
-                        onKeyDown={(event) => {
-                            if (event.key === "Enter") {
-                                search();
-                            }
-                        }}
-                        onChange={(event) => setSearchInput(event.target.value)}
-                        className="flex-1 px-4 py-3 rounded-lg bg-white/10 backdrop-blur-sm text-white placeholder-gray-400 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+        <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route
+                path="/dashboard"
+                element={
+                    <DashboardPage
+                        onLogout={handleLogout}
+                        spotifyData={spotifyData}
+                        timeRange={timeRange}
+                        onTimeRangeChange={setTimeRange}
+                        isLoading={dataLoading}
+                        token={token || ""}
                     />
-                    <button
-                        onClick={search}
-                        className="px-8 py-3 bg-blue-500 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
-                    >
-                        Search
-                    </button>
-                </div>
-            </div>
-
-            <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {albums.map((album) => (
-                        <div
-                            key={album.id}
-                            className="bg-white/5 backdrop-blur-sm rounded-lg overflow-hidden border border-white/10 hover:bg-white/10 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl"
-                        >
-                            <img
-                                src={album.images[0]?.url}
-                                alt={album.name}
-                                className="w-full aspect-square object-cover"
-                            />
-                            <div className="p-4">
-                                <h3 className="text-white font-bold text-lg mb-2 line-clamp-2">
-                                    {album.name}
-                                </h3>
-                                <p className="text-gray-400 text-sm mb-4">
-                                    Release Date: <br />
-                                    <span className="text-white">{album.release_date}</span>
-                                </p>
-                                <a
-                                    href={album.external_urls.spotify}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block w-full text-center bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200"
-                                >
-                                    Album Link
-                                </a>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
+                }
+            />
+            <Route
+                path="/search"
+                element={
+                    <SearchPage
+                        onLogout={handleLogout}
+                        user={{
+                            name: spotifyData.user?.display_name || "",
+                            email: spotifyData.user?.email || "",
+                            image: spotifyData.user?.images?.[0]?.url,
+                        }}
+                    />
+                }
+            />
+            <Route
+                path="/compare"
+                element={
+                    <ComparePage
+                        onLogout={handleLogout}
+                        spotifyData={spotifyData}
+                        token={token || ""}
+                    />
+                }
+            />
+            <Route path="/callback" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+    )
 }
 
-export default App;
+export default App
