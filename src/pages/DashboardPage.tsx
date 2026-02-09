@@ -91,6 +91,9 @@ export default function DashboardPage({ onLogout, spotifyData, timeRange, onTime
             />
 
             <main className="container mx-auto px-4 py-8">
+                {/* User Stats */}
+                {user && <UserStatsCards user={user} />}
+
                 {/* Listening Stats */}
                 <div className="mb-8">
                     <ListeningStats
@@ -101,16 +104,14 @@ export default function DashboardPage({ onLogout, spotifyData, timeRange, onTime
                     />
                 </div>
 
+
+                {/* Music Compatibility */}
+                <MusicCompatibility spotifyData={spotifyData} />
+
                 {/* Similar Artists */}
                 <div className="mb-8">
                     <SimilarArtists artists={topArtists} token={token} />
                 </div>
-
-                {/* User Stats */}
-                {user && <UserStatsCards user={user} />}
-
-                {/* Music Compatibility */}
-                <MusicCompatibility spotifyData={spotifyData} />
 
                 {/* Time Range Selector */}
                 <div className="flex flex-wrap items-center gap-2 mb-6">
