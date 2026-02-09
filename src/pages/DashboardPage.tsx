@@ -1,8 +1,6 @@
 import { Header } from "@/layout/header"
 import { useState } from "react"
 import { GenreDonutChart } from "@/components/GenreDonutChart"
-import { ListeningStats } from "@/components/ListeningStats"
-import { ListeningStreaks } from "@/components/ListeningStreaks"
 import { PopularityBars } from "@/components/PopularityBars"
 import { RecentlyPlayed } from "@/components/RecentlyPlayed"
 import { TopAlbums } from "@/components/TopAlbums"
@@ -92,19 +90,9 @@ export default function DashboardPage({ onLogout, spotifyData, timeRange, onTime
             />
 
             <main className="container mx-auto px-4 py-8">
-                {/* Listening Stats */}
-                <div className="mb-8">
-                    <ListeningStats
-                        totalMinutes={Math.round(topTracks.reduce((sum, t) => sum + t.duration_ms, 0) / 60000)}
-                        uniqueArtists={topArtists.length}
-                        uniqueTracks={topTracks.length}
-                        topGenre={topGenre}
-                    />
-                </div>
 
-                {/* Listening Streaks + Similar Artists */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <ListeningStreaks recentTracks={recentTracks} />
+                {/* Similar Artists */}
+                <div className="mb-8">
                     <SimilarArtists artists={topArtists} token={token} />
                 </div>
 
