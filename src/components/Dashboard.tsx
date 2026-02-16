@@ -103,7 +103,7 @@ function Dashboard({ accessToken, onLogout, useMockData = false }: DashboardProp
 
                 // Fetch top artists
                 const artistsRes = await fetch(
-                    "https://api.spotify.com/v1/me/top/artists?limit=10&time_range=medium_term",
+                    "https://api.spotify.com/v1/me/top/artists?limit=50&time_range=medium_term",
                     { headers }
                 );
                 const artistsData = await artistsRes.json();
@@ -111,7 +111,7 @@ function Dashboard({ accessToken, onLogout, useMockData = false }: DashboardProp
 
                 // Fetch top tracks
                 const tracksRes = await fetch(
-                    "https://api.spotify.com/v1/me/top/tracks?limit=10&time_range=medium_term",
+                    "https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=medium_term",
                     { headers }
                 );
                 const tracksData = await tracksRes.json();

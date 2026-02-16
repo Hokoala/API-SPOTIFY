@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import { Header } from "@/layout/header"
 import { Footer } from "@/components/Footer"
 import type { SpotifyData } from "@/App"
+import type { ComparisonEntry } from "@/components/LeaderboardList"
 
 interface FriendProfile {
     userName: string
@@ -99,6 +100,27 @@ export default function ComparePage({ onLogout, spotifyData }: ComparePageProps)
     }
 
     const compatibility = friendProfile ? computeCompatibility(myProfile, friendProfile) : null
+
+    // Save comparison to localStorage for leaderboard
+    useEffect(() => {
+        if (!friendProfile || !compatibility) return
+        const entry: ComparisonEntry = {
+            friendName: friendProfile.userName,
+            friendImage: friendProfile.userImage,
+            score: compatibility.totalScore,
+            commonArtists: compatibility.commonArtists,
+            commonTracks: compatibility.commonTracks,
+            commonGenres: compatibility.commonGenres,
+            comparedAt: new Date().toISOString(),
+        }
+        try {
+            const raw = localStorage.getItem("spotify_comparisons")
+            const existing: ComparisonEntry[] = raw ? JSON.parse(raw) : []
+            const filtered = existing.filter((e) => e.friendName !== entry.friendName)
+            filtered.push(entry)
+            localStorage.setItem("spotify_comparisons", JSON.stringify(filtered))
+        } catch { /* ignore */ }
+    }, [friendProfile, compatibility])
 
     // Circular score
     const score = compatibility?.totalScore || 0
