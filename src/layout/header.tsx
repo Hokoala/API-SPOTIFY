@@ -88,13 +88,6 @@ export function Header({ user, onLogout }: HeaderProps) {
                     Carte du monde
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator className="bg-zinc-700" />
-                <DropdownMenuLabel className="text-zinc-500 text-xs uppercase tracking-wider">Social</DropdownMenuLabel>
-                <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => navigate("/reviews")} className="text-zinc-300 hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
-                    Avis & Notes
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
           </nav>
