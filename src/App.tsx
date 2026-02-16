@@ -4,8 +4,16 @@ import Login from "./components/Login"
 import DashboardPage from "./pages/DashboardPage"
 import SearchPage from "./pages/SearchPage"
 import ComparePage from "./pages/ComparePage"
+import LeaderboardPage from "./pages/LeaderboardPage"
+import WrappedPage from "./pages/WrappedPage"
+import WorldMapPage from "./pages/WorldMapPage"
+import MainstreamPage from "./pages/MainstreamPage"
+import TierListPage from "./pages/TierListPage"
+import TimeMachinePage from "./pages/TimeMachinePage"
+import ReviewsPage from "./pages/ReviewsPage"
 
 export interface SpotifyUser {
+    id: string
     display_name: string
     email: string
     images: { url: string }[]
@@ -31,6 +39,8 @@ export interface Track {
         images: { url: string }[]
     }
     duration_ms: number
+    preview_url?: string | null
+    popularity?: number
 }
 
 export interface RecentTrack {
@@ -138,9 +148,9 @@ function App() {
 
                 const [userRes, artistsRes, tracksRes, recentRes] = await Promise.all([
                     fetch("https://api.spotify.com/v1/me", { headers }),
-                    fetch(`https://api.spotify.com/v1/me/top/artists?limit=20&time_range=${timeRange}`, { headers }),
-                    fetch(`https://api.spotify.com/v1/me/top/tracks?limit=20&time_range=${timeRange}`, { headers }),
-                    fetch("https://api.spotify.com/v1/me/player/recently-played?limit=20", { headers }),
+                    fetch(`https://api.spotify.com/v1/me/top/artists?limit=50&time_range=${timeRange}`, { headers }),
+                    fetch(`https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=${timeRange}`, { headers }),
+                    fetch("https://api.spotify.com/v1/me/player/recently-played?limit=50", { headers }),
                 ])
 
                 if (!userRes.ok) {
@@ -242,6 +252,71 @@ function App() {
                 path="/compare"
                 element={
                     <ComparePage
+                        onLogout={handleLogout}
+                        spotifyData={spotifyData}
+                        token={token || ""}
+                    />
+                }
+            />
+            <Route
+                path="/leaderboard"
+                element={
+                    <LeaderboardPage
+                        onLogout={handleLogout}
+                        spotifyData={spotifyData}
+                    />
+                }
+            />
+<Route
+                path="/wrapped"
+                element={
+                    <WrappedPage
+                        spotifyData={spotifyData}
+                        token={token || ""}
+                    />
+                }
+            />
+            <Route
+                path="/map"
+                element={
+                    <WorldMapPage
+                        onLogout={handleLogout}
+                        spotifyData={spotifyData}
+                    />
+                }
+            />
+            <Route
+                path="/mainstream"
+                element={
+                    <MainstreamPage
+                        onLogout={handleLogout}
+                        spotifyData={spotifyData}
+                    />
+                }
+            />
+            <Route
+                path="/tierlist"
+                element={
+                    <TierListPage
+                        onLogout={handleLogout}
+                        spotifyData={spotifyData}
+                    />
+                }
+            />
+            <Route
+                path="/time-machine"
+                element={
+                    <TimeMachinePage
+                        onLogout={handleLogout}
+                        spotifyData={spotifyData}
+                        token={token || ""}
+                    />
+                }
+            />
+            <Route
+                path="/reviews"
+                element={
+                    <ReviewsPage
                         onLogout={handleLogout}
                         spotifyData={spotifyData}
                         token={token || ""}

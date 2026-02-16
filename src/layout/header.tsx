@@ -5,10 +5,11 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 
 interface HeaderProps {
   user?: {
@@ -20,6 +21,8 @@ interface HeaderProps {
 }
 
 export function Header({ user, onLogout }: HeaderProps) {
+  const navigate = useNavigate()
+
   return (
     <header className="border-b border-zinc-800 bg-zinc-900">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -48,6 +51,52 @@ export function Header({ user, onLogout }: HeaderProps) {
             <Button variant="ghost" asChild className="text-zinc-300 hover:text-white hover:bg-zinc-800">
               <Link to="/compare">Comparer</Link>
             </Button>
+
+            {/* Plus dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-zinc-300 hover:text-white hover:bg-zinc-800">
+                  Plus
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48 bg-zinc-800 border-zinc-700" align="start">
+                <DropdownMenuLabel className="text-zinc-500 text-xs uppercase tracking-wider">Analyse</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => navigate("/time-machine")} className="text-zinc-300 hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
+                    Time Machine
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/mainstream")} className="text-zinc-300 hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
+                    How Mainstream?
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/wrapped")} className="text-zinc-300 hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
+                    Wrapped
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator className="bg-zinc-700" />
+                <DropdownMenuLabel className="text-zinc-500 text-xs uppercase tracking-wider">Fun</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => navigate("/tierlist")} className="text-zinc-300 hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
+                    Tier List
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/leaderboard")} className="text-zinc-300 hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
+                    Classement
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/map")} className="text-zinc-300 hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
+                    Carte du monde
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator className="bg-zinc-700" />
+                <DropdownMenuLabel className="text-zinc-500 text-xs uppercase tracking-wider">Social</DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem onClick={() => navigate("/reviews")} className="text-zinc-300 hover:bg-zinc-700 focus:bg-zinc-700 cursor-pointer">
+                    Avis & Notes
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
 

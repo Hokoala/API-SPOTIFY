@@ -79,6 +79,18 @@ export default function DashboardPage({ onLogout, spotifyData, timeRange, onTime
     // Calculer le genre le plus écouté
     const topGenre = genres[0]?.name || "N/A"
 
+    // Calculer les artistes uniques à partir des top tracks
+    const uniqueArtistNames = new Set<string>()
+    topTracks.forEach((track) => {
+        track.artists.forEach((artist) => uniqueArtistNames.add(artist.name))
+    })
+
+    // Calculer les albums uniques à partir des top tracks
+    const uniqueAlbumNames = new Set<string>()
+    topTracks.forEach((track) => {
+        uniqueAlbumNames.add(track.album.name)
+    })
+
     return (
         <div className="min-h-screen bg-black text-white">
             <Header
@@ -98,7 +110,8 @@ export default function DashboardPage({ onLogout, spotifyData, timeRange, onTime
                 <div className="mb-8">
                     <ListeningStats
                         totalMinutes={Math.round(topTracks.reduce((sum, t) => sum + t.duration_ms, 0) / 60000)}
-                        uniqueArtists={topArtists.length}
+                        uniqueArtists={uniqueArtistNames.size}
+                        uniqueAlbums={uniqueAlbumNames.size}
                         uniqueTracks={topTracks.length}
                         topGenre={topGenre}
                     />
