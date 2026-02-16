@@ -10,7 +10,6 @@ import WorldMapPage from "./pages/WorldMapPage"
 import MainstreamPage from "./pages/MainstreamPage"
 import TierListPage from "./pages/TierListPage"
 import TimeMachinePage from "./pages/TimeMachinePage"
-import ReviewsPage from "./pages/ReviewsPage"
 
 export interface SpotifyUser {
     id: string
@@ -307,16 +306,6 @@ function App() {
                 path="/time-machine"
                 element={
                     <TimeMachinePage
-                        onLogout={handleLogout}
-                        spotifyData={spotifyData}
-                        token={token || ""}
-                    />
-                }
-            />
-            <Route
-                path="/reviews"
-                element={
-                    <ReviewsPage
                         onLogout={handleLogout}
                         spotifyData={spotifyData}
                         token={token || ""}
